@@ -22,10 +22,7 @@ use MyIO;
 my $FILE;
 my @SNP;
 my @DEPTH;
-my $usage = "
-
- [options]
-
+my $usage = "\n\n $0 [options]\n
 Options:
     -snp        SNP percentage (float) lower and upper bound; [90.0 100.0]
     -depth      Depth of SNP coverage bound; [0 Inf]
@@ -41,7 +38,7 @@ GetOptions(
     help                    => sub{pod2usage($usage);}
 )or pod2usage(2);
 
-checkCLA(\@SNP, \@DEPTH); #check command line arguments passed
+checkCLA(); #check command line arguments passed
 #-------------------------------------------------------------------------------
 # VARIABLES
 my ($outFile) = $FILE =~ /(.+)\.snps/; $outFile = $outFile . "_filtered.snps";
@@ -110,7 +107,7 @@ sub extractColumns {
             # say "SNP $i is outside SNP % bounds- SNP %: $snpPer";
         }
         $i++;
-    }
+    } close $FH;
     say "-----------------------------------------------------\nTotal number of SNPs: $i";
     say "Passing: $snpCount\n";
     return;
