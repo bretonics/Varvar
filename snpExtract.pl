@@ -16,9 +16,7 @@ use MyIO;
 #
 # ==============================================================================
 
-#-------------------------------------------------------------------------------
-# VARIABLES
-my $outFile = "out.txt";
+
 #-------------------------------------------------------------------------------
 # COMMAND LINE
 my $FILE;
@@ -35,7 +33,6 @@ Options:
 
 ";
 
-
 # OPTIONS
 GetOptions(
     'file=s'                => \$FILE,
@@ -45,6 +42,9 @@ GetOptions(
 )or pod2usage(2);
 
 checkCLA(\@SNP, \@DEPTH); #check command line arguments passed
+#-------------------------------------------------------------------------------
+# VARIABLES
+my ($outFile) = $FILE =~ /(.+)\.txt/; $outFile = $outFile . ".snps";
 #-------------------------------------------------------------------------------
 # CALLS
 extractColumns($FILE, $outFile, \@SNP, \@DEPTH);
@@ -60,11 +60,11 @@ extractColumns($FILE, $outFile, \@SNP, \@DEPTH);
 # $output = Dies from errors
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 sub checkCLA {
-    # unless ($FILE) {
-    #     die "You did not provide an input file.", $!, $usage;
-    # }
+    unless ($FILE) {
+        die "You did not provide an input file.", $!, $usage;
+    }
     unless (@SNP && @DEPTH) {
-        die "Did not provide snp and/or depth bounds to use as limits.", $!, $usage;
+        die "Did not provide snp and/or depth arguments.", $!, $usage;
     }
     return;
 }
@@ -72,8 +72,8 @@ sub checkCLA {
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # $input = ();
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# This function takes arguments
-#
+# This function takes 4 arguments, input file(s), out file, SNP
+# percentage(s), and depth coverage bound(s)
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # $return = ();
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -114,12 +114,3 @@ sub extractColumns {
     say "Passing: $snpCount\n";
     return;
 }
-
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# $input = ();
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# This function takes arguments
-#
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-# $output =
-#- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
