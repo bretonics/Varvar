@@ -44,7 +44,7 @@ GetOptions(
 checkCLA(\@SNP, \@DEPTH); #check command line arguments passed
 #-------------------------------------------------------------------------------
 # VARIABLES
-my ($outFile) = $FILE =~ /(.+)\.txt/; $outFile = $outFile . ".snps";
+my ($outFile) = $FILE =~ /(.+)\.snps/; $outFile = $outFile . "_filtered.snps";
 #-------------------------------------------------------------------------------
 # CALLS
 extractColumns($FILE, $outFile, \@SNP, \@DEPTH);
@@ -91,7 +91,9 @@ sub extractColumns {
 
     my $i = 1; my $snpCount = 0;
     my $FH = getFH("<", $file);
+    my $outFH = getFH(">>", $outFile);
     while (<$FH>) {
+        say $outFH $_ if $. == 1; #print header to outfile
         next if $. == 1; #skip header
         my @line = split /\t/; #split line by tab delim
         my ($snpPer) = $line[10] =~ /(^\d+\.\d+)\s\%/; #get percentage float
@@ -99,7 +101,6 @@ sub extractColumns {
             my $depth = $line[13];
             if ($depth <= $depthMax && $depth >= $depthMin) { #check Depth is within bounds
                 say "SNP $i is inside bounds- SNP %: $snpPer \t Depth: $depth";
-                my $outFH = getFH(">", $outFile);
                 say $outFH $_; #write passing SNP to file
                 $snpCount++;
             } else { #Depth is outside of bounds
