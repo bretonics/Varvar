@@ -98,7 +98,7 @@ sub extractColumns {
             my $depth = $line[13];
             if ($depth <= $depthMax && $depth >= $depthMin) { #check Depth is within bounds
                 say "SNP $i is inside bounds- SNP %: $snpPer \t Depth: $depth";
-                say $outFH $_; #write passing SNP to file
+                print $outFH $_; #write passing SNP to file
                 $snpCount++;
             } else { #Depth is outside of bounds
                 # say "SNP $i is outside depth bounds- Depth: $depth";
