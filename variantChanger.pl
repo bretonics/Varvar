@@ -90,32 +90,42 @@ sub changeSNPs {
     my $startPos = 1;
     my $endPos = 0;
 
-    while (<$SEQFH>) {
+    while (my $sequence = <$SEQFH>) {
         if ($. == 1) {
-            print $OUTFH $_; next;
+            print $OUTFH $sequence; next;
         }
-        chomp;
-        my $sequence = $_;
+        chomp($sequence);
+        # my ($sequence) = chomp($_);
         my $seqLen = length($sequence); #get FASTA sequence char/line count
         $startPos = $startPos + $seqLen unless $. == 2; #seq line start position, ommit 1st line redundancy
         $endPos = $endPos + $seqLen; #seq line end position
         my @seq = split('', $sequence); #split seq line into array
-
+        my $IDXindel = 0;
+# say "\nLine $. length: $seqLen start: $startPos \n$sequence";
         for (my $i = 0; $i < $numVars; $i++) { #itereate through variants in order of reference position
             my $refPosition = $sortedRefPos[$i];
             if ( $refPosition >= $startPos and $refPosition <= $endPos) {
                 foreach my $varOccurance ( @{$variants{$refPosition}} ) { #get each occurance at reference position -> handle multiple for same position
+
                     my @variantInfo = @$varOccurance; #array with $type, $calledBase, $variantLen
                     my $type = $variantInfo[0];
                     my $calledBase = $variantInfo[1];
                     my $variantLen = $variantInfo[2];
                     # my @seq = split('', $seqLine); #split seq line into array
-                    my $offset = $refPosition - $startPos; #handle position number within current substring line
+# say "INDX = $IDXindel";
+                    my $offset = $refPosition - $startPos + $IDXindel; #handle position number within current substring line
+# say "Offset Before: $offset";
                     # Handle SNP Type -> modify
                     if ($type eq "insertion") {
-                        splice(@seq, $offset, $variantLen, $calledBase); #insert in sequence
+                        $offset++; #insert 1 postion over $refPosition
+                        splice(@seq, $offset, 0, $calledBase); #insert in sequence
+                        $offset--; #reset offset to original
+                        $IDXindel = $IDXindel + $variantLen;
+# say "index insert: $IDXindel";
                     } elsif ($type eq "deletion") {
-                        splice(@seq, $offset, $variantLen, "-"); #delete in sequence
+                        splice(@seq, $offset, $variantLen); #delete in sequence
+                        $IDXindel = $IDXindel - $variantLen;
+# say "index deletion: $IDXindel";
                     } elsif ($type eq "SNP") {
                         $seq[$offset] =  $calledBase; #replace SNP in sequence
                     } else {
@@ -140,16 +150,16 @@ sub _variantLogic {
         if ($refBase eq "-") { #probably an insertion in reference
             $type = "insertion";
             $variantLen = length($calledBase); #take called base string length
-            say "Variant type ($refBase) at $refPosition taken as an insertion in reference";
+            say "INSERTION\t($calledBase) at position $refPosition in reference";
         } elsif ($calledBase eq "-") { #probably a deletion in reference
             $type = "deletion";
             $variantLen = length($refBase); #take reference string length
-            say "Variant type ($refBase) at $refPosition taken as a deletion in reference";
+            say "DELETION\t($refBase) at position $refPosition in reference";
         } else {
             warn "Could not determine variant type ($refBase), continuing as SNP...";
         }
     } else {
-        say "SNP ($refBase -> $calledBase) at $refPosition";
+        say "SNP\t\t($refBase -> $calledBase) at position $refPosition in reference";
     }
     return ($refPosition, $type, $calledBase, $variantLen);
 }
