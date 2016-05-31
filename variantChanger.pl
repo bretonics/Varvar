@@ -42,16 +42,13 @@ GetOptions(
 checkCLA(); #check command line arguments passed
 #-------------------------------------------------------------------------------
 # VARIABLES
-
-
-
+my $variantsREF = getSNPinfo($SNPFILE);
 #-------------------------------------------------------------------------------
 # CALLS
-my $variantsREF = getSNPinfo($SNPFILE);
 changeSNPs($SEQFILE, $OUTFILE, $variantsREF);
-
 #-------------------------------------------------------------------------------
 # SUBS
+
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
 # $input = argChecks();
 #- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -79,41 +76,56 @@ sub getSNPinfo {
         # a string of insertions
         push @{ $variants{$refPosition} }, [ $type, $calledBase, $variantLen ];
     } close $SNPFH;
+        # print Dumper \%variants; exit
     return(\%variants);
-    # print Dumper \%variants; exit
-
 }
 
 sub changeSNPs {
     my ($seqFile, $outFile, $variantsREF) = @_;
+    my %variants =  %$variantsREF; #dereference variants Hash of Array of Arrays
     my $OUTFH = getFH(">", $outFile);
     my $SEQFH = getFH("<", $seqFile);
+    my @sortedRefPos = sort { $a<=>$b } keys %variants; #sort and trasnform to array
+    my $numVars = @sortedRefPos;
     my $startPos = 1;
     my $endPos = 0;
+
     while (<$SEQFH>) {
         if ($. == 1) {
             print $OUTFH $_; next;
         }
-        my $lineLen = length($_); #get FASTA sequence char/line count
-        $startPos = $startPos + $lineLen unless $. == 2; #seq line start position, ommit 1st line redundancy
-        $endPos = $endPos + $lineLen; #seq line end position
-        if ( $refPosition >= $startPos and $refPosition <= $endPos) {
-            my @seq = split('', $_); #split seq line into array
-            my $offset = $refPosition - $startPos; #handle position number within current substring line
-            # Handle SNP Type -> modify
-            if ($type eq "insertion") {
-                splice(@seq, $offset, $variantLen, $calledBase); #insert in sequence
-            } elsif ($type eq "deletion") {
-                splice(@seq, $offset, $variantLen); #delete in sequence
-            } elsif ($type eq "SNP") {
-                $seq[$offset] =  $calledBase; #replace SNP in sequence
-            } else {
-                die "Something is really wrong. Could not modify variant.\n", $!;
+        chomp;
+        my $sequence = $_;
+        my $seqLen = length($sequence); #get FASTA sequence char/line count
+        $startPos = $startPos + $seqLen unless $. == 2; #seq line start position, ommit 1st line redundancy
+        $endPos = $endPos + $seqLen; #seq line end position
+        my @seq = split('', $sequence); #split seq line into array
+
+        for (my $i = 0; $i < $numVars; $i++) { #itereate through variants in order of reference position
+            my $refPosition = $sortedRefPos[$i];
+            if ( $refPosition >= $startPos and $refPosition <= $endPos) {
+                foreach my $varOccurance ( @{$variants{$refPosition}} ) { #get each occurance at reference position -> handle multiple for same position
+                    my @variantInfo = @$varOccurance; #array with $type, $calledBase, $variantLen
+                    my $type = $variantInfo[0];
+                    my $calledBase = $variantInfo[1];
+                    my $variantLen = $variantInfo[2];
+                    # my @seq = split('', $seqLine); #split seq line into array
+                    my $offset = $refPosition - $startPos; #handle position number within current substring line
+                    # Handle SNP Type -> modify
+                    if ($type eq "insertion") {
+                        splice(@seq, $offset, $variantLen, $calledBase); #insert in sequence
+                    } elsif ($type eq "deletion") {
+                        splice(@seq, $offset, $variantLen, "-"); #delete in sequence
+                    } elsif ($type eq "SNP") {
+                        $seq[$offset] =  $calledBase; #replace SNP in sequence
+                    } else {
+                        die "Something is really wrong. Could not modify variant.\n", $!;
+                    }
+                }
+                $sequence = join('', @seq);
             }
-            print $OUTFH @seq; #print modified sequence line
-            next; #skip to next sequence line
         }
-        print $OUTFH $_; #print line to new seq file
+        say $OUTFH $sequence; #print line not needing changes to new seq file
     } close $SEQFH; close $OUTFH;
 }
 
