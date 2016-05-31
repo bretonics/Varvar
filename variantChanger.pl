@@ -72,14 +72,13 @@ sub changeSNPs {
     my $OUTFH = getFH(">", $outFile);
     while (<$SNPFH>) {
         next if $. == 1; #skip header
-        my ($refPosition, $type, $variant, $variantLen) = _variantLogic($_); #handle variant logic, get type & length
-say $refPosition, $type, $variant, $variantLen; exit;
+        my ($refPosition, $type, $calledBase, $variantLen) = _variantLogic($_); #handle variant logic, get type & length
+
         # Open Sequence File
         my $SEQFH = getFH("<", $seqFile);
         my $startPos = 1;
         my $endPos = 0;
         while (<$SEQFH>) {
-            print $OUTFH $_; #print line to new seq file
             next if $. == 1;
             my $lineLen = length($_); #get FASTA sequence char/line count
             $startPos = $startPos + $lineLen unless $. == 2; #seq line start position, ommit 1st line redundancy
@@ -89,37 +88,43 @@ say $refPosition, $type, $variant, $variantLen; exit;
                 my $offset = $refPosition - $startPos; #handle position number within current substring line
                 # Handle SNP Type -> modify
                 if ($type eq "insertion") {
-                    splice(@seq, $offset, $variantLen,  $variant,); #insert in sequence
+                    splice(@seq, $offset, $variantLen, $calledBase); #insert in sequence
                 } elsif ($type eq "deletion") {
                     splice(@seq, $offset, $variantLen); #delete in sequence
                 } elsif ($type eq "SNP") {
-                    $seq[$offset] =  $variant; #replace snp in sequence
+                    $seq[$offset] =  $calledBase; #replace SNP in sequence
                 } else {
-                    die "Something is really wrong. Could not modify variant ($variant).\n", $!;
+                    die "Something is really wrong. Could not modify variant.\n", $!;
                 }
                 print $OUTFH @seq; #print modified sequence line
+            } else { #sequence line not where change needs to be made
+                print $OUTFH $_; #print line to new seq file
             }
-        } close $SEQFH; close $OUTFH;
-    } close $SNPFH;
+        } close $SEQFH;
+    } close $SNPFH; close $OUTFH;
 }
 
 
 sub _variantLogic {
     my ($line) = @_;
-    my ($refPosition, $type, $variant) = $line =~ /^\?\t.+\t\d+\t(\d+)\t(\w+)\t(\w+)\t\w+\t.*/; #get variant type Indel/SNP
+    my @items = split("\t", $line);
+    my ($refPosition, $type, $refBase, $calledBase) = ($items[3], $items[4], $items[5], $items[6]); #get variant type Indel/SNP
+
     my $variantLen = 0;
     if ($type eq "Indel") { # Handle insertion vs. deletion logic, otherwise == SNP
-        if ($variant eq "-") { #probably an insertion in reference
+        if ($refBase eq "-") { #probably an insertion in reference
             $type = "insertion";
-            # Length of deletion may be > 1
-                        say "Variant type ($variant) taken as a deletion in reference";
-        } elsif ($variant =~ /\w+/) { #probably a deletion in reference
+            $variantLen = length($calledBase); #take called base string length
+            say "Variant type ($refBase) at $refPosition taken as an insertion in reference";
+        } elsif ($calledBase eq "-") { #probably a deletion in reference
             $type = "deletion";
-            $variantLen = length($variant); #take reference string length
-            say "Variant type ($variant) taken as an insertion in reference";
+            $variantLen = length($refBase); #take reference string length
+            say "Variant type ($refBase) at $refPosition taken as a deletion in reference";
         } else {
-            warn "Could not determine variant type ($variant), continuing as SNP...";
+            warn "Could not determine variant type ($refBase), continuing as SNP...";
         }
+    } else {
+        say "SNP ($refBase -> $calledBase) at $refPosition";
     }
-    return ($refPosition, $type, $variant, $variantLen);
+    return ($refPosition, $type, $calledBase, $variantLen);
 }
