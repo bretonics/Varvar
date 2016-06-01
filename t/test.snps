@@ -1,0 +1,12 @@
+SNP	Contig ID	Contig Pos	Ref Pos	Type	Ref Base	Called Base	Genotype	Impact	Homopolymer	SNP %	P not ref	Q call	Depth	A Cnt	C Cnt	G Cnt	T Cnt	Deletion
+?	pseudo_used_gi|A4049.1|	134	5	Indel	-	A	Variant		Homopolymer	86.0 %	100.00 %	60.00 	179	154	0	0	0	25
+?	pseudo_used_gi|A4049.1|	1234	10	Indel	A	-	Variant		Homopolymer	90.9 %	100.00 %	60.00 	176	-	0	0	0	160
+?	pseudo_used_gi|A4049.1|	1235	12	SNP	T	G	Variant		Homopolymer	97.0 %	100.00 %	60.00 	231	0	0	0	-	224
+?	pseudo_used_gi|A4049.1|	1512	14	Indel	T	-	Variant		Homopolymer	100.0 %	100.00 %	60.00 	150	0	0	0	-	150
+?	pseudo_used_gi|A4049.1|	1535	20	Indel	A	-	Variant		Homopolymer	85.0 %	100.00 %	60.00 	173	-	0	1	0	147
+?	pseudo_used_gi|A4049.1|	1536	21	SNP	T	G	Variant		Homopolymer	93.8 %	100.00 %	60.00 	130	0	0	0	-	122
+?	pseudo_used_gi|A4049.1|	1536	22	SNP	T	G	Variant		Homopolymer	93.8 %	100.00 %	60.00 	130	0	0	0	-	122
+?	pseudo_used_gi|A4049.1|	1536	60	SNP	T	G	Variant		Homopolymer	93.8 %	100.00 %	60.00 	130	0	0	0	-	122
+?	pseudo_used_gi|A4049.1|	1512	75	Indel	T	-	Variant		Homopolymer	100.0 %	100.00 %	60.00 	150	0	0	0	-	150
+?	pseudo_used_gi|A4049.1|	1512	77	Indel	T	-	Variant		Homopolymer	100.0 %	100.00 %	60.00 	150	0	0	0	-	150
+?	pseudo_used_gi|A4049.1|	134	80	Indel	-	A	Variant		Homopolymer	86.0 %	100.00 %	60.00 	179	154	0	0	0	25
