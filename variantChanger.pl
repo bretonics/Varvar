@@ -132,9 +132,7 @@ sub changeSNPs {
                     # Handle SNP Type -> modify
                     my $offset = $refPosition - $startPos + $IDXindel; #handle position number within current substring sequence line
                     if ($type eq "insertion") {
-                        $offset++; #insert 1 postion over $refPosition
                         splice(@seq, $offset, 0, $calledBase); #insert in sequence
-                        $offset--; #reset offset to original
                         $IDXindel = $IDXindel + $variantLen;
                     } elsif ($type eq "deletion") {
                         splice(@seq, $offset, $variantLen); #delete in sequence
