@@ -24,6 +24,7 @@ my @SNP;
 my @DEPTH;
 my $usage = "\n\n $0 [options]\n
 Options:
+    -file       SNP table input file
     -snp        SNP percentage (float) lower and upper bound; [90.0 100.0]
     -depth      Depth of SNP coverage bound; [0 Inf]
     -help       Shows this message
