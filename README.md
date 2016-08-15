@@ -2,8 +2,8 @@ Varvar
 --
 
 [![GitHub version](https://badge.fury.io/gh/bretonics%2Fvarvar.svg)](http://badge.fury.io/gh/bretonics%2Fvarvar)
-[![Github Issues](http://githubbadges.herokuapp.com/bretonics/varvar/issues.svg)](https://github.com/bretonics/varvar/issues)
-[![Pending Pull-Requests](http://githubbadges.herokuapp.com/bretonics/varvar/pulls.svg)](https://github.com/bretonics/varvar/pulls)
+[![Github Issues](http://githubbadges.herokuapp.com/bretonics/varvar/issues)](https://github.com/bretonics/varvar/issues)
+[![Pending Pull-Requests](http://githubbadges.herokuapp.com/bretonics/varvar/pulls)](https://github.com/bretonics/varvar/pulls)
 [![GitHub license](https://img.shields.io/badge/License-MIT-orange.svg)](https://bretonics.mit-license.org/)
 ![](https://reposs.herokuapp.com/?path=bretonics/varvar&color=lightgrey)
 
